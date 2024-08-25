@@ -1,13 +1,17 @@
 import { Outlet, useHref, useNavigate, type NavigateOptions } from "react-router-dom";
-import { defaultTheme, Provider as SpectrumProvider } from '@adobe/react-spectrum';
+import { darkTheme, Provider as SpectrumProvider } from '@adobe/react-spectrum';
 import './App.css'
+import Logo from './Star_Wars_Logo.svg'
+
+
 
 function RootLayout() {
   const navigate = useNavigate();
 
   return (
-    <SpectrumProvider theme={defaultTheme} router={{ navigate, useHref }}>
-      <div className='flex flex-col items-center justify-center'>
+    <SpectrumProvider theme={darkTheme} router={{ navigate, useHref }}>
+      <div className='flex flex-col items-center bg-black h-[100vh]'>
+        <img src={Logo} alt='star wars logo' className="mb-5" />
         <Outlet />
       </div>
     </SpectrumProvider>

@@ -1,8 +1,8 @@
-import { useLoaderData } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import { Category, Person } from "../../shared/types";
 import { useQuery } from "react-query";
 import { getMatchingEntity } from "../../shared/API";
-import { TableView, TableHeader, Column, TableBody, Row, Cell, Flex, ActionButton } from "@adobe/react-spectrum";
+import { TableView, TableHeader, Text, Column, TableBody, Row, Cell, Flex, ActionButton, Button, ButtonGroup, Content, Dialog, DialogTrigger } from "@adobe/react-spectrum";
 import { useEffect, useState } from "react";
 import PersonForm from "./PersonForm";
 
@@ -23,7 +23,7 @@ export const CategoryPage = () => {
   }, [data]);
 
   if (categoryName !== Category.PEOPLE) {
-    return <h1>{categoryName ?? "category"}</h1>
+    return <h1 className="capitalize">{categoryName ?? "category"}</h1>
   }
 
   function savePerson(event: React.FormEvent<HTMLFormElement>) {
@@ -62,46 +62,77 @@ export const CategoryPage = () => {
     success: 'idle',
   } as const)[queryStatus]
 
-  return (
-    <div className="w-[900px]">
-      <h1>People</h1>
+  const showPersonForm = editingPerson || showNewPersonForm;
 
-      <section className="h-24 my-6">
-        {editingPerson && <PersonForm key={editingPerson} defaultValues={people?.get(editingPerson)} onSave={savePerson} onCancel={() => setEditingPerson("")} />}
-        {showNewPersonForm && <PersonForm onSave={savePerson} onCancel={() => setShowNewPersonForm(false)} />}
-      </section>
+  return (
+    <div className="w-[900px] bg-black flex flex-col">
+
+      <h1>People</h1>
+      <Link to="/" className="self-start mt-10 text-2xl">Return to search</Link>
 
       <Flex height="size-5000" width="100%" direction="column" gap="size-150">
-        <ActionButton alignSelf="end" onPress={() => setShowNewPersonForm(true)}>Add Person</ActionButton>
-        <TableView flex aria-label="Example table with static contents">
-          <TableHeader>
-            <Column align="center">Name</Column>
-            <Column align="center">Birth year</Column>
-            <Column align="center">Gender</Column>
-            <Column align="center">Height</Column>
-            <Column align="center">Eye Color</Column>
-            <Column align="center" width={200}>Actions</Column>
-          </TableHeader>
-          <TableBody loadingState={TableStatusDisplay}>
-            {Array.from(people?.values() ?? []).map((person) => (
-              <Row key={person.created}>
-                <Cell>{person.name}</Cell>
-                <Cell>{person.birth_year}</Cell>
-                <Cell>{person.gender}</Cell>
-                <Cell>{person.height}</Cell>
-                <Cell>{person.eye_color}</Cell>
-                <Cell>
-                  <div className="flex gap-1 justify-center">
-                    <button onClick={() => setEditingPerson(person.created)}>Edit</button>
-                    <button onClick={() => deletePerson(person.created)}>Delete</button>
-                  </div>
-                </Cell>
-              </Row>)
-            )}
-          </TableBody>
-        </TableView>
-      </Flex>
+        <div className={`mb-10 self-end ${showNewPersonForm && '[&>button]:bg-teal'}`}>
+          <ActionButton alignSelf="end" onPress={() => setShowNewPersonForm(current => !current)}>Add Person</ActionButton>
+        </div>
+        {showPersonForm ? (
+          <section className="h-80 my-6 flex justify-center">
+            <PersonForm key={editingPerson ?? undefined} defaultValues={editingPerson ? people?.get(editingPerson) : undefined} onSave={savePerson} onCancel={() => editingPerson ? setEditingPerson("") : setShowNewPersonForm(false)} />
+          </section>
+        ) :
+          <TableView flex aria-label="Example table with static contents">
+            <TableHeader >
+              <Column align="center">Name</Column>
+              <Column align="center">Birth year</Column>
+              <Column align="center">Gender</Column>
+              <Column align="center">Height</Column>
+              <Column align="center">Eye Color</Column>
+              <Column align="center" width={200}>Actions</Column>
+            </TableHeader>
+            <TableBody loadingState={TableStatusDisplay}>
+              {Array.from(people?.values() ?? []).map((person) => (
+                <Row key={person.created}>
+                  <Cell>{person.name}</Cell>
+                  <Cell>{person.birth_year}</Cell>
+                  <Cell>{person.gender}</Cell>
+                  <Cell>{person.height}</Cell>
+                  <Cell>{person.eye_color}</Cell>
+                  <Cell>
+                    <div className="flex gap-1 justify-center">
+                      <ActionButton
+                        onPress={() => setEditingPerson(person.created)}
+                        isQuiet UNSAFE_className="!text-[#fbe122] action-normal">Edit</ActionButton>
+                      <DialogTrigger>
+                        <ActionButton isQuiet UNSAFE_className="!text-[#c8102e] action-danger">Delete</ActionButton>
+                        {(close) => (
+                          <Dialog>
+                            <Content>
+                              <Text>
+                                Cancelling will discard all changes made. Do you want to continue?
+                              </Text>
+                            </Content>
+                            <ButtonGroup>
+                              <Button variant="secondary" onPress={close}>Cancel</Button>
+                              <Button variant="negative" onPress={() => {
+                                close();
+                                deletePerson(person.created);
+                              }}>Confirm</Button>
+                            </ButtonGroup>
+                          </Dialog>
+                        )}
+                      </DialogTrigger>
+                    </div>
+                  </Cell>
+                </Row>)
+              )}
+            </TableBody>
+          </TableView>}
+      </Flex >
 
-    </div>
+      {/* <section className="h-80 my-6 flex">
+        {editingPerson && <PersonForm key={editingPerson} defaultValues={people?.get(editingPerson)} onSave={savePerson} onCancel={() => setEditingPerson("")} />}
+        {showNewPersonForm && <PersonForm onSave={savePerson} onCancel={() => setShowNewPersonForm(false)} />}
+      </section> */}
+
+    </div >
   );
 }
