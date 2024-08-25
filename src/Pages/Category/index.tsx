@@ -127,12 +127,6 @@ export const CategoryPage = () => {
             </TableBody>
           </TableView>}
       </Flex >
-
-      {/* <section className="h-80 my-6 flex">
-        {editingPerson && <PersonForm key={editingPerson} defaultValues={people?.get(editingPerson)} onSave={savePerson} onCancel={() => setEditingPerson("")} />}
-        {showNewPersonForm && <PersonForm onSave={savePerson} onCancel={() => setShowNewPersonForm(false)} />}
-      </section> */}
-
     </div >
   );
 }
